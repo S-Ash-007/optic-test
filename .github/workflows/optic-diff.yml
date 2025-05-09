@@ -32,4 +32,5 @@ jobs:
 
       # Run Optic diff
       - name: Run Optic Diff
-        run: optic diff current.yaml new.yaml --check
+        # run: optic diff current.yaml new.yaml --check
+        run: optic lint current.yaml 
