@@ -38,9 +38,10 @@ ruleset:
       # Ie new properties, operations, responses, etc.
       added:
         # URLs are supported
-        - https://www.apistyleguides.dev/api/url-style-guides/3ba0b4a
+        - ./rules/oas.yaml
+        - ./rules/security.yaml
         # Local files work too.
       # - ./local-file.js
       # These rules will ony run on everything in the spec (normal spectral)
       always:
-        - https://www.apistyleguides.dev/api/url-style-guides/3ba0b4a
+        - ./rules/oas.yaml
