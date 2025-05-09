@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics Dashboard</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Additional Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <!-- Flatpickr CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.9/flatpickr.min.css">
+
+    <!-- Chart.js CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.5.0/chart.min.css" rel="stylesheet">
+
+    <!-- Bootstrap CSS (if still needed for modal) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+
+            /* Sky Blue*/
+            /* --bg-color: rgb(240, 248, 255);
+--card-color: rgb(255, 255, 255);
+--text-color: rgb(30, 60, 90);
+--hover-color: rgba(3, 169, 244, 0.1); */
+
+            /* Cool Gray*/
+            --bg-color: rgb(240, 243, 246);
+            --card-color: rgb(255, 255, 255);
+            --text-color: rgb(44, 62, 80);
+            --hover-color: rgba(52, 73, 94, 0.07);
+        }
+
+        body {
+            font-family: 'Nunito', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0px;
+            height: 100vh;
+            padding: 0px;
+            /* overflow: hidden; */
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Custom Styles for Hover Effects on Metrics */
+        .metric::before {
+            background: radial-gradient(800px circle at var(--mouse-x) var(--mouse-y), rgba(52, 73, 94, 0.07), transparent 40%);
+            border-radius: inherit;
+            content: "";
+            height: 100%;
+            left: 0;
+            position: absolute;
+            top: 0;
+            width: 100%;
+            z-index: 2;
+            opacity: 0;
+            transition: opacity 500ms;
+        }
+
+        .metric:hover::before {
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container mx-auto p-6">
+        <!-- Main Header -->
+        <div class="text-2xl font-semibold mb-8 border-b-2 border-gray-400 inline-block text-gray-700">
+            Generative AIITSM Dashboard
+        </div>
+
+        <!-- Trending Topics -->
+        <div class="mb-8">
+            <div class="text-xl font-semibold mb-4 text-gray-700">Trending Topics</div>
+            <div id="trendingHashtags" class="flex flex-wrap gap-2">
+                <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">#ITSM</span>
+                <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">#IncidentManagement</span>
+                <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">#ChangeManagement</span>
+                <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">#KnowledgeManagement</span>
+                <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">#SLA</span>
+                <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">#ITIL</span>
+            </div>
+        </div>
+
+        <!-- Metrics -->
+        <div class="flex flex-wrap justify-between gap-5 mb-8">
+            <!-- Metric Card -->
+            <div
+                class="metric relative flex-1 min-w-[30%] bg-white p-5 rounded-lg shadow-md transition transform hover:shadow-xl hover:-translate-y-1 cursor-pointer">
+                <div class="text-gray-700 font-semibold">OpenAPI</div>
+                <div class="text-3xl font-bold text-gray-700">500</div>
+            </div>
+            <div
+                class="metric relative flex-1 min-w-[30%] bg-white p-5 rounded-lg shadow-md transition transform hover:shadow-xl hover:-translate-y-1 cursor-pointer">
+                <div class="text-gray-700 font-semibold">GraphQl</div>
+                <div class="text-3xl font-bold text-gray-700">105</div>
+            </div>
+            <div
+                class="metric relative flex-1 min-w-[30%] bg-white p-5 rounded-lg shadow-md transition transform hover:shadow-xl hover:-translate-y-1 cursor-pointer">
+                <div class="text-gray-700 font-semibold">AsyncApi</div>
+                <div class="text-3xl font-bold text-gray-700">7</div>
+            </div>
+            <div
+                class="metric relative flex-1 min-w-[30%] bg-white p-5 rounded-lg shadow-md transition transform hover:shadow-xl hover:-translate-y-1 cursor-pointer">
+                <div class="text-gray-700 font-semibold">OpenAPI</div>
+                <div class="text-3xl font-bold text-gray-700">500</div>
+            </div>
+            <div
+                class="metric relative flex-1 min-w-[30%] bg-white p-5 rounded-lg shadow-md transition transform hover:shadow-xl hover:-translate-y-1 cursor-pointer">
+                <div class="text-gray-700 font-semibold">User Satisfaction Rate</div>
+                <div class="text-3xl font-bold text-green-500">90%</div>
+            </div>
+        </div>
+
+        <!-- API Distribution Chart -->
+        <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+            <h3 class="text-xl font-semibold mb-4 text-gray-700">API Distribution in Org</h3>
+            <canvas id="doughnut" class="w-full h-80"></canvas>
+        </div>
+
+        <!-- Date Picker and API Stats -->
+        <div class="glass-card p-6 backdrop-blur-lg bg-white/5 rounded-2xl shadow-lg border border-white/10">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold text-white">Dashboard</h2>
+                <div class="flex space-x-2">
+                    <button
+                        class="time-btn bg-white/10 hover:bg-red-300/30 active:bg-red-300/30 text-white rounded-full px-3 py-1 transition duration-300 cursor-pointer"
+                        data-period="1D">1D</button>
+                    <button
+                        class="time-btn bg-white/10 hover:bg-red-300/30 active:bg-red-300/30 text-white rounded-full px-3 py-1 transition duration-300 cursor-pointer"
+                        data-period="1W">1W</button>
+                    <button
+                        class="time-btn bg-white/10 hover:bg-red-300/30 active:bg-red-300/30 text-white rounded-full px-3 py-1 transition duration-300 cursor-pointer"
+                        data-period="1M">1M</button>
+                    <button
+                        class="time-btn bg-white/10 hover:bg-red-300/30 active:bg-red-300/30 text-white rounded-full px-3 py-1 transition duration-300 cursor-pointer"
+                        data-period="1Y">1Y</button>
+                    <div class="relative">
+                        <button
+                            class="time-btn bg-white/10 hover:bg-red-300/30 active:bg-red-300/30 text-white rounded-full px-3 py-1 transition duration-300 cursor-pointer"
+                            data-period="CUSTOM" id="customDateBtn">
+                            Custom Dates
+                        </button>
+                        <div id="customDatePickerContainer"
+                            class="date-picker-tooltip absolute right-0 mt-2 hidden bg-white shadow-lg rounded-lg p-4">
+                            <div id="customDatePicker"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div
+                    class="glass-card p-6 backdrop-blur-lg bg-white/5 rounded-2xl shadow-lg flex flex-col justify-center items-center text-white">
+                    <h3 class="text-xl font-semibold mb-4">Newly Added APIs</h3>
+                    <p id="newApis" class="text-5xl font-bold">0</p>
+                </div>
+                <div
+                    class="glass-card p-6 backdrop-blur-lg bg-white/5 rounded-2xl shadow-lg flex flex-col justify-center items-center text-white">
+                    <h3 class="text-xl font-semibold mb-4">Updated APIs</h3>
+                    <p id="updatedApis" class="text-5xl font-bold">0</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Sample Queries -->
+    <div class="modal fade" id="sampleQueriesModal" tabindex="-1" aria-labelledby="sampleQueriesModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="sampleQueriesModalLabel">Questions Timeline for <span
+                            id="selectedHashtag"></span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <ul id="sampleQueriesList" class="timeline-list">
+                        <!-- Sample queries will be injected here -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Flatpickr JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.9/flatpickr.min.js"></script>
+
+    <!-- Chart.js JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.5.0/chart.min.js"></script>
+
+    <!-- Bootstrap JS (for Modal) -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- jQuery (if needed) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.slim.min.js"></script>
+
+    <script>
+        // Handle Mouse Movement for Metric Hover Effects
+        document.querySelector(".metric-container").onmousemove = e => {
+            const metrics = document.querySelectorAll(".metric");
+            metrics.forEach(metric => {
+                const rect = metric.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                metric.style.setProperty("--mouse-x", `${x}px`);
+                metric.style.setProperty("--mouse-y", `${y}px`);
+            });
+        };
+
+        // API Statistics Data
+        const apiStatsData = {
+            '1D': { new: 5, updated: 3 },
+            '1W': { new: 12, updated: 8 },
+            '1M': { new: 25, updated: 15 },
+            '1Y': { new: 100, updated: 75 },
+            'CUSTOM': { new: 0, updated: 0 } // Placeholder for custom dates
+        };
+
+        // Handle Time Button Clicks
+        document.querySelectorAll('.time-btn').forEach(button => {
+            button.addEventListener('click', function () {
+                // Remove active class from all buttons
+                document.querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('active'));
+                // Add active class to the clicked button
+                this.classList.add('active');
+                const timePeriod = this.dataset.period;
+
+                if (timePeriod === 'CUSTOM') {
+                    // Show date picker for custom date selection
+                    const customDatePickerContainer = document.getElementById('customDatePickerContainer');
+                    customDatePickerContainer.classList.remove('hidden');
+
+                    flatpickr("#customDatePicker", {
+                        mode: "range",
+                        dateFormat: "Y-m-d",
+                        onClose: function (selectedDates) {
+                            if (selectedDates.length === 2) {
+                                const [startDate, endDate] = selectedDates;
+                                // Process custom date range and update the statistics
+                                // For demo purposes, generate random stats
+                                const customNew = Math.floor(Math.random() * 50);
+                                const customUpdated = Math.floor(Math.random() * 50);
+                                apiStatsData['CUSTOM'] = { new: customNew, updated: customUpdated };
+
+                                // Update the API statistics values
+                                const apiStats = apiStatsData['CUSTOM'];
+                                document.getElementById('newApis').textContent = apiStats.new;
+                                document.getElementById('updatedApis').textContent = apiStats.updated;
+                            }
+                            // Hide the date picker after selection
+                            customDatePickerContainer.classList.add('hidden');
+                        }
+                    }).open();
+                } else {
+                    // Hide the custom date picker if it's open
+                    document.getElementById('customDatePickerContainer').classList.add('hidden');
+                    // Update the API statistics values based on the selected time period
+                    const apiStats = apiStatsData[timePeriod];
+                    document.getElementById('newApis').textContent = apiStats.new;
+                    document.getElementById('updatedApis').textContent = apiStats.updated;
+                }
+            });
+        });
+
+        // Initial statistics rendering
+        const initialTimePeriod = '1D';
+        const initialApiStats = apiStatsData[initialTimePeriod];
+        document.getElementById('newApis').textContent = initialApiStats.new;
+        document.getElementById('updatedApis').textContent = initialApiStats.updated;
+
+        // Example Chart Initialization
+        const ctx = document.getElementById('doughnut').getContext('2d');
+        const doughnutChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['OpenAPI', 'GraphQl', 'AsyncApi'],
+                datasets: [{
+                    data: [500, 105, 7],
+                    backgroundColor: [
+                        '#4dc9f6',
+                        '#f67019',
+                        '#f53794'
+                    ],
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    </script>
+</body>
+
+</html>

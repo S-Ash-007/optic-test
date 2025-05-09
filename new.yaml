@@ -1,0 +1,67 @@
+openapi: 3.0.0
+info:
+  title: Sample Store API
+  version: 1.1.0
+paths:
+  /users:
+    get:
+      summary: List users
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserV2"
+  /users/{id}:
+    get:
+      summary: Get a single user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserV2"
+  /orders:
+    post:
+      summary: Create order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Order"
+      responses:
+        "201":
+          description: Created
+components:
+  schemas:
+    UserV2:
+      type: object
+      properties:
+        id:
+          type: integer
+        fullName:
+          type: string
+      required:
+        - id
+        - fullName
+    Order:
+      type: object
+      properties:
+        orderId:
+          type: string
+        amount:
+          type: number
+      required:
+        - orderId
+        - amount
